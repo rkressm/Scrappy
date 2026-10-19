@@ -85,17 +85,46 @@ def extract_page_data(html: str, page_url: str) -> PageData:
         "image_urls": get_images_from_html(html, page_url),
     }
 
+
 def get_html(url: str) -> str:
     try:
-        response = requests.get(url, headers={"User-Agent": "BootCrawler/1.0"})
+        response = requests.get(url)
     except Exception as e:
         raise Exception(f"network error while fetching {url}: {e}")
-
     if response.status_code > 399:
         raise Exception(f"got HTTP error: {response.status_code} {response.reason}")
-
     content_type = response.headers.get("content-type", "")
     if "text/html" not in content_type:
         raise Exception(f"got non-HTML response: {content_type}")
-
     return response.text
+
+
+def safe_get_html(url: str) -> str | None:
+    try:
+        return get_html(url)
+    except Exception as e:
+        print(f"{e}")
+        return None
+
+
+def crawl_page(base_url, current_url=None, page_data=None):
+    if current_url == None:
+        current_url = base_url
+    if page_data == None:
+        page_data = {}
+    if urlsplit(current_url).netloc != urlsplit(base_url).netloc:
+        return
+    normalized_current_url = normalize_url(current_url)
+    if normalized_current_url in page_data:
+        return page_data
+    print(f"crawling {current_url}")
+    current_html = safe_get_html(current_url)
+    if current_html == None:
+        return page_data
+    page_info = extract_page_data(current_html, current_url)
+    page_data[normalized_current_url] = page_info
+    next_urls = page_info["outgoing_links"]
+    for next_url in next_urls:
+        page_data = crawl_page(base_url, next_url, page_data)
+    return page_data
+
