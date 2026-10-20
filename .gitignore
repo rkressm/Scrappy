@@ -9,3 +9,4 @@ wheels/
 *.pyc
 # Virtual environments
 .venv
+.ruff*
