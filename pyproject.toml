@@ -9,3 +9,8 @@ dependencies = [
     "beautifulsoup4==4.13.4",
     "requests==2.32.4",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.17.1",
+]
