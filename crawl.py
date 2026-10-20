@@ -113,7 +113,7 @@ def crawl_page(base_url, current_url=None, page_data=None):
     if page_data == None:
         page_data = {}
     if urlsplit(current_url).netloc != urlsplit(base_url).netloc:
-        return
+        return page_data
     normalized_current_url = normalize_url(current_url)
     if normalized_current_url in page_data:
         return page_data
